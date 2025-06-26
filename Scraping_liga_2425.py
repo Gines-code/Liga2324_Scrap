@@ -12,6 +12,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 
+import os
+import warnings
+
+warnings.filterwarnings('ignore')
+
 start_time = time.time()
 
 ####### PROYECTO PARA SACAR DATOS DE LA LIGA #######
@@ -38,11 +43,18 @@ ActionChains(driver).key_down(Keys.TAB).key_up(Keys.TAB).perform()
 time.sleep(2)
 ActionChains(driver).key_down(Keys.ENTER).key_up(Keys.ENTER).perform()
 time.sleep(2)
-
-jornada_datos = '14'
-ruta_datos = f'C:/Users/Gines/Desktop/webscrap_liga/datos24-25/jornada_{jornada_datos}/'
-
+try:
+    jornada_datos = os.getenv("jornada_datos", 2)
+    jornada_datos = int(jornada_datos)
+except:
+    jornada_datos = 18
+jornada_datos_str = str(jornada_datos)
+ruta_datos = f'C:/Users/Gines/Desktop/webscrap_liga/datos24-25/jornada_{jornada_datos_str}/'
 J=35
+
+file_path_ej = ruta_datos + 'ejemp.csv'
+
+os.makedirs(os.path.dirname(file_path_ej), exist_ok=True)
 
 
 ###1###   LEER HISTORICO DE RESULTADOS DE LA PAGINA DE LA LIGA
@@ -60,8 +72,8 @@ jornada=list()
 tiempo=list()
 
 j=2
-J=16 #sumar 2 mas que la jornada actual
-while j<J:  #Bucle que recorre las jornadas con los resultados
+J=17 #sumar 2 mas que la jornada actual
+while j<(jornada_datos + 2):  #Bucle que recorre las jornadas con los resultados
     pages1=driver.find_element(By.XPATH,"//table[@class='styled__TableStyled-sc-43wy8s-1 ffaSZZ']")
     print(pages1.text)  #Texto con los resultados de todos los partidos de las jornadas X
 
@@ -75,6 +87,8 @@ while j<J:  #Bucle que recorre las jornadas con los resultados
     list_text = [elemento for elemento in list_text if not elemento.startswith('Horario')]
     list_text = [elemento for elemento in list_text if not elemento.startswith('*Horario')]
     list_text = [elemento for elemento in list_text if not elemento.startswith('* Horario')]
+    ##
+    list_text = [elemento for elemento in list_text if not elemento.startswith('*')]
     #print(list_text)
 
 
@@ -159,10 +173,14 @@ print(df_resultados)
 # (se debe cambiar la ruta del csv!!!!!)
 
 #función para eliminar datos de un csv
-file = open(ruta_datos + "resultados.xlsx", "w")
-file.close()
-#función para meter datos a un csv
-df_resultados.to_excel(ruta_datos + 'resultados.xlsx')
+try:
+    file = open(ruta_datos + "resultados.xlsx", "w")
+    file.close()
+    #función para meter datos a un csv
+    df_resultados.to_excel(ruta_datos + 'resultados.xlsx')
+except:
+    #función para meter datos a un csv
+    df_resultados.to_excel(ruta_datos + 'resultados.xlsx')
 
 
 
@@ -177,7 +195,8 @@ time.sleep(1.7)
 print(len(driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 kNfrPo']")))
 
 #Se clicka en la clasificacion
-driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 kNfrPo']")[2].click()
+#driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 kNfrPo']")[2].click()
+driver.find_elements(By.XPATH,"//a[@class='styled__SubMenuItemStyled-sc-1yo1ylr-6 ebhLYB']")[2].click()
 time.sleep(2.3)
 
 #clicko en la jornada para sacar las jornadas
@@ -208,8 +227,8 @@ PJ = list()
 
 j=0
 
-N_clasi = 14
-while j < N_clasi:
+N_clasi = 15
+while j < jornada_datos:
     lista_clasi=list()
     lclasi=list()
     print(j)
@@ -283,19 +302,31 @@ DG = [int(a) / int(b) if int(b) != 0 else 0 for a, b in zip(DG, PJ)]
 df_clasi= pd.DataFrame({"posicion": posicion, "equipo": equipo,"puntos":puntos,"jornada":jornada,"PJ":PJ,"PG":PG,"PE":PE,"PP":PP,"GF":GF,"GC":GC,"DG":DG})
 print(df_clasi)
 
+try:
+    #función para eliminar datos de un csv
+    file = open(ruta_datos + "clasificacion.xlsx", "w")
+    file.close()
+    #función para meter datos a un csv
+    df_clasi.to_excel(ruta_datos + 'clasificacion.xlsx')
+except:
+    df_clasi.to_excel(ruta_datos + 'clasificacion.xlsx')
 
-#función para eliminar datos de un csv
-file = open(ruta_datos + "clasificacion.xlsx", "w")
-file.close()
-#función para meter datos a un csv
-df_clasi.to_excel(ruta_datos + 'clasificacion.xlsx')
 
 
+# #Clicko en el banner para cerrar las jornadas de clasificacion#
+try:
+    driver.find_element(By.XPATH,"//i[@class='styled__IconRegularContainer-sc-1lapsw7-0 fVlOEb font-laliga icon-triangle_down undefined']").click()
+    time.sleep(1)
+except:
+    time.sleep(1)
 
 
 ###### CLASIFIACION DE PARTIDOS SOLO EN CASA ######
-#driver.find_elements(By.XPATH,"//div[@class='styled__TabItem-sc-7p309w-9 lrfIX']")[0].click()
 driver.find_elements(By.XPATH,"//div[@class='styled__TabItem-sc-7p309w-11 hLvUaq']")[0].click()
+# element=driver.find_elements(By.XPATH,"//div[@class='styled__CompetitionMenuItem-sc-7qz1ev-3 kmvAYy']")[0]
+# ActionChains(driver).move_to_element(element).perform()
+time.sleep(1.7)
+
 #Pincho en partidos en casa
 time.sleep(2.1)
 
@@ -322,8 +353,8 @@ GF=list()
 GC=list()
 DG=list()
 j=0
-casa_clasi=14 #Numero de jornadas (¡¡AUTOMATIZAR!!)
-while j<casa_clasi:  #Bucle con la clasificacion por jornada
+casa_clasi=15 #Numero de jornadas (¡¡AUTOMATIZAR!!)
+while j<jornada_datos:  #Bucle con la clasificacion por jornada
     clasificacion = driver.find_element(By.XPATH,"//div[@class='styled__ContentTabs-sc-7p309w-3 ghLiOY']").text
     #clasificacion = driver.find_element(By.XPATH,"//div[@class='styled__StandingTableBody-sc-e89col-5 kIvDwR']").text
     lista_clasi=clasificacion.split(sep='\n')
@@ -388,12 +419,14 @@ df_clasi_casa= pd.DataFrame({"posicion": posicion, "equipo": equipo,"puntos":pun
 print(df_clasi_casa)
 
 
-
-#función para eliminar datos de un csv
-file = open(ruta_datos + "clasi_casa.xlsx", "w")
-file.close()
-#función para meter datos a un csv
-df_clasi_casa.to_excel(ruta_datos + 'clasi_casa.xlsx')
+try:
+    #función para eliminar datos de un csv
+    file = open(ruta_datos + "clasi_casa.xlsx", "w")
+    file.close()
+    #función para meter datos a un csv
+    df_clasi_casa.to_excel(ruta_datos + 'clasi_casa.xlsx')
+except:
+    df_clasi_casa.to_excel(ruta_datos + 'clasi_casa.xlsx')
 
 
 ###### CLASIFIACION DE PARTIDOS SOLO FUERA ######
@@ -425,8 +458,8 @@ GF=list()
 GC=list()
 DG=list()
 j=0
-fuera_clasi=14 #Numero de jornadas (¡¡AUTOMATIZAR!!)
-while j<casa_clasi:  #Bucle con la clasificacion por jornada
+fuera_clasi=15 #Numero de jornadas (¡¡AUTOMATIZAR!!)
+while j<jornada_datos:  #Bucle con la clasificacion por jornada
     clasificacion = driver.find_element(By.XPATH,"//div[@class='styled__ContentTabs-sc-7p309w-3 ghLiOY']").text
     lista_clasi=clasificacion.split(sep='\n')
 
@@ -490,12 +523,14 @@ df_clasi_fuera= pd.DataFrame({"posicion": posicion, "equipo": equipo,"puntos":pu
 print(df_clasi_fuera)
 
 
-
-#función para eliminar datos de un csv
-file = open(ruta_datos + "clasi_fuera.xlsx", "w")
-file.close()
-#función para meter datos a un csv
-df_clasi_casa.to_excel(ruta_datos + 'clasi_fuera.xlsx')
+try:
+    #función para eliminar datos de un csv
+    file = open(ruta_datos + "clasi_fuera.xlsx", "w")
+    file.close()
+    #función para meter datos a un csv
+    df_clasi_casa.to_excel(ruta_datos + 'clasi_fuera.xlsx')
+except:
+    df_clasi_casa.to_excel(ruta_datos + 'clasi_fuera.xlsx')
 
 
 
