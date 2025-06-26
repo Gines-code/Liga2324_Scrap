@@ -10,64 +10,51 @@ import os
 notebook_path = os.getcwd()
 print(notebook_path)
 
+def modif_jornada_mas1(df):
+    """
+    Modifica la variable jornada_datos sumando 1.
+    """
+    df['jornada'] = df['jornada'] + 1
+    return df
 
 try:
     jornada_datos = os.getenv("jornada_datos", 2)
 except:
     jornada_datos = '18'
 
-
 # ## 1- Lectura del fichero
-
 
 #jornada_datos = '16'
 ruta = f'C:/Users/Gines/Desktop/webscrap_liga/datos24-25/jornada_{jornada_datos}/'
 
 
 # Lectura del fichero de Resultados
-
-
 ruta_excel_resultados = ruta + "resultados.xlsx"
-
-
 df_pd_resultados = pd.read_excel(ruta_excel_resultados)
 
 
 # Lectura del fichero de Clasificacion
-
-
 ruta_excel_clasificacion = ruta + "clasificacion.xlsx"
-
-
 df_pd_clasificacion = pd.read_excel(ruta_excel_clasificacion)
-
-
 df_clasificacion_1 = df_pd_clasificacion
+df_clasificacion_1 = modif_jornada_mas1(df_clasificacion_1)
 
 
 
 # Lectura del fichero Clasi_casa
-
-
 ruta_excel_clasi_casa = ruta + "clasi_casa.xlsx"
-
-
 df_pd_clasiCasa = pd.read_excel(ruta_excel_clasi_casa)
+df_pd_clasiCasa = modif_jornada_mas1(df_pd_clasiCasa)
 
 
 # Lectura del fichero Clasi_fuera
-
-
 ruta_excel_clasi_fuera = ruta + "clasi_fuera.xlsx"
-
-
 df_pd_clasiFuera = pd.read_excel(ruta_excel_clasi_fuera)
+df_pd_clasiFuera = modif_jornada_mas1(df_pd_clasiFuera)
 
 
 
 # # 2- Union de los dataframes
-
-
 result = df_pd_resultados
 clasi = df_pd_clasificacion
 clasi_1 = df_clasificacion_1
