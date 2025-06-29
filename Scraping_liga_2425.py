@@ -33,6 +33,7 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service = service,options=options)
 
 url23 = "https://www.laliga.com/es-GB/laliga-easports/resultados/2024-25/jornada-1"  #Esta es la url a la que voy a acceder
+#url23 = "https://www.laliga.com/es-GB/laliga-easports/resultados/2024-25/jornada-30"
 driver.get(url23)
 time.sleep(3) #wait until page charges (aguanto 5 seg hasta que la web cargue)
 ActionChains(driver).key_down(Keys.TAB).key_up(Keys.TAB).perform()
@@ -44,14 +45,14 @@ time.sleep(2)
 ActionChains(driver).key_down(Keys.ENTER).key_up(Keys.ENTER).perform()
 time.sleep(2)
 try:
-    jornada_datos = os.getenv("jornada_datos", 2)
+    jornada_datos = os.getenv("jornada_datos", 38)
     jornada_datos = int(jornada_datos)
 except:
     jornada_datos = 18
 jornada_datos_str = str(jornada_datos)
 ruta_datos = f'C:/Users/Gines/Desktop/webscrap_liga/datos24-25/jornada_{jornada_datos_str}/'
 J=35
-
+j_ini= 0
 file_path_ej = ruta_datos + 'ejemp.csv'
 
 os.makedirs(os.path.dirname(file_path_ej), exist_ok=True)
@@ -71,7 +72,7 @@ arbitro=list()
 jornada=list()
 tiempo=list()
 
-j=2
+j= j_ini + 2
 J=17 #sumar 2 mas que la jornada actual
 while j<(jornada_datos + 2):  #Bucle que recorre las jornadas con los resultados
     pages1=driver.find_element(By.XPATH,"//table[@class='styled__TableStyled-sc-43wy8s-1 ffaSZZ']")
@@ -132,11 +133,10 @@ while j<(jornada_datos + 2):  #Bucle que recorre las jornadas con los resultados
         i=i+1
     print(list_text)
 
-    #driver.find_elements(By.XPATH, "//ul[@class='styled__ItemsList-sc-d9k1bl-2 hbLeMB']")[2].click()
-    print(len(driver.find_elements(By.XPATH, "//ul[@class='styled__ItemsList-sc-d9k1bl-2 hbLeMB']")))
     # driver.find_elements(By.XPATH, "//ul[@class='styled__ItemsList-sc-d9k1bl-2 hbLeMB']")[2].click()
-    print(len(driver.find_elements(By.XPATH, "//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW']")))
-    driver.find_elements(By.XPATH, "//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW']")[3].click()
+    print(len(driver.find_elements(By.XPATH, "//div[@class='styled__SelectedItem-sc-d9k1bl-1 bspoVB']")))
+    #driver.find_elements(By.XPATH, "//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW']")[3].click()
+    #driver.find_elements(By.XPATH, "//div[@class='styled__SelectedItem-sc-d9k1bl-1 bspoVB']")[0].click()
     #Clika en el banner de las jornadas
     time.sleep(2)
     
@@ -146,7 +146,10 @@ while j<(jornada_datos + 2):  #Bucle que recorre las jornadas con los resultados
     print(j)
 
     #abre la jornada j
-    driver.find_elements(By.XPATH, "//li[@class='styled__Item-sc-d9k1bl-3 eXotyy']")[j].click()
+    try:
+        driver.find_elements(By.XPATH, "//li[@class='styled__Item-sc-d9k1bl-3 eXotyy']")[j].click()
+    except:
+        print('Se acaba de recoger datos de la jornada')
     #Clika en la jornada j, para irse a esa jornada
     time.sleep(2)
     j=j+1
@@ -201,13 +204,13 @@ time.sleep(2.3)
 
 #clicko en la jornada para sacar las jornadas
 print(len(driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW']")))
-driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW']")[1].click()
+#driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW']")[1].click()
 
 time.sleep(4)
 
 # Se clicka en la jornada 1 (esta empieza en el elemento 244)
 print(len(driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")))
-driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")[244].click()
+driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")[244 + j_ini].click()
 #cliko en la jornada 1
 
 time.sleep(4)
@@ -225,8 +228,7 @@ GC=list()
 DG=list()
 PJ = list()
 
-j=0
-
+j=j_ini
 N_clasi = 15
 while j < jornada_datos:
     lista_clasi=list()
@@ -270,12 +272,14 @@ while j < jornada_datos:
             r=r+1
     
     #clicka banner jornadas
-    driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW']")[3].click()
+    #driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW']")[3].click()
     time.sleep(1.2)
+    print(driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']"))
     # clicka en la jornada
     if j != (N_clasi-1):
         try:
             driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")[244 + j].click()
+            #driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")[j].click()
             time.sleep(1.1)
         except:
             print('Se acaba de recoger datos de clasificacion')
@@ -335,8 +339,9 @@ driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW
 #clicko en la jornada para sacar las jornadas
 time.sleep(2)
 
+j=31
 print(len(driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")))
-driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")[244].click()
+driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")[244 + j].click()
 #cliko en la jornada 1
 time.sleep(2.1)
 ####Voy a meter todos los elementos de la clasificacion en una lista####
@@ -352,7 +357,7 @@ PP=list()
 GF=list()
 GC=list()
 DG=list()
-j=0
+j=j_ini
 casa_clasi=15 #Numero de jornadas (¡¡AUTOMATIZAR!!)
 while j<jornada_datos:  #Bucle con la clasificacion por jornada
     clasificacion = driver.find_element(By.XPATH,"//div[@class='styled__ContentTabs-sc-7p309w-3 ghLiOY']").text
@@ -440,8 +445,9 @@ driver.find_elements(By.XPATH,"//p[@class='styled__TextStyled-sc-1mby3k1-0 XgneW
 #clicko en la jornada para sacar las jornadas
 time.sleep(2.1)
 
+j=31
 print(len(driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")))
-driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")[244].click()
+driver.find_elements(By.XPATH,"//li[@class='styled__Item-sc-d9k1bl-3 VNATM']")[244 + j].click()
 #cliko en la jornada 1
 time.sleep(2.3)
 ####Voy a meter todos los elementos de la clasificacion en una lista####
@@ -457,7 +463,7 @@ PP=list()
 GF=list()
 GC=list()
 DG=list()
-j=0
+j=j_ini
 fuera_clasi=15 #Numero de jornadas (¡¡AUTOMATIZAR!!)
 while j<jornada_datos:  #Bucle con la clasificacion por jornada
     clasificacion = driver.find_element(By.XPATH,"//div[@class='styled__ContentTabs-sc-7p309w-3 ghLiOY']").text
