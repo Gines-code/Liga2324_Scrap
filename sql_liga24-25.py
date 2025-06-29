@@ -18,7 +18,7 @@ def modif_jornada_mas1(df):
     return df
 
 try:
-    jornada_datos = os.getenv("jornada_datos", 2)
+    jornada_datos = os.getenv("jornada_datos", 32)
 except:
     jornada_datos = '18'
 
